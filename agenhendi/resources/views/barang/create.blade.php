@@ -12,29 +12,77 @@
         <div class="bg-white rounded-lg shadow-md">
             <form action="{{ route('barang.store') }}" method="POST" class="p-8">
                 @csrf
+            <!-- Dynamic Supplier List Selection -->
+            <div class="mb-6" x-data="{ 
+                selectedSuppliers: {{ json_encode(old('supplier_ids', [])) }},
+                suppliers: {{ json_encode($suppliers) }},
+                addSupplier(e) {
+                    let val = e.target.value;
+                    if (val && !this.selectedSuppliers.includes(val)) {
+                        this.selectedSuppliers.push(val);
+                    }
+                    e.target.value = '';
+                },
+                removeSupplier(id) {
+                    this.selectedSuppliers = this.selectedSuppliers.filter(item => item != id);
+                },
+                getSupplierName(id) {
+                    let found = this.suppliers.find(s => s.id == id);
+                    return found ? found.nama_supplier : '';
+                }
+            }">
+                <label class="block text-gray-700 font-semibold mb-2" for="supplier_select">
+                    Pilih Supplier (Bisa lebih dari 1) <span class="text-red-600">*</span>
+                </label>
 
+                <!-- Dropdown Selector -->
+                <select 
+                    id="supplier_select" 
+                    @change="addSupplier($event)"
+                    class="w-full border border-gray-300 rounded-lg p-2.5 bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mb-3"
+                >
+                    <option value="" selected disabled>-- Pilih Supplier untuk Ditambahkan --</option>
+                    <template x-for="supplier in suppliers" :key="supplier.id">
+                        <option 
+                            :value="supplier.id" 
+                            :disabled="selectedSuppliers.includes(supplier.id.toString()) || selectedSuppliers.includes(supplier.id)"
+                            x-text="supplier.nama_supplier"
+                        ></option>
+                    </template>
+                </select>
 
-
-                <!-- Supplier Selection -->
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        Pilih Supplier (Bisa lebih dari 1) <span class="text-red-600">*</span>
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 border border-gray-300 rounded-lg p-4 bg-gray-50 h-40 overflow-y-auto">
-                        @foreach($suppliers as $supplier)
-                            <label class="flex items-center space-x-3 bg-white p-2 border rounded hover:bg-blue-50 cursor-pointer">
-                                <input type="checkbox" name="supplier_ids[]" value="{{ $supplier->id }}" class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
-                                <span class="text-gray-700">{{ $supplier->nama_supplier }}</span>
-                            </label>
-                        @endforeach
-                    </div>
-                    @error('supplier_ids')
-                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                    @enderror
-                    @error('supplier_ids.*')
-                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                    @enderror
+                <!-- Column / List of Selected Suppliers -->
+                <div class="flex flex-col gap-2">
+                    <template x-for="(id, index) in selectedSuppliers" :key="id">
+                        <div class="flex items-center justify-between bg-gray-100 border border-gray-300 rounded-lg p-3">
+                            <!-- Hidden inputs to submit array values in Laravel form -->
+                            <input type="hidden" name="supplier_ids[]" :value="id">
+                            
+                            <span class="font-medium text-gray-700" x-text="getSupplierName(id)"></span>
+                            
+                            <button 
+                                type="button" 
+                                @click="removeSupplier(id)"
+                                class="text-red-500 hover:text-red-700 font-semibold text-sm focus:outline-none"
+                            >
+                                Hapus
+                            </button>
+                        </div>
+                    </template>
                 </div>
+
+                <!-- Empty state feedback -->
+                <div x-show="selectedSuppliers.length === 0" class="text-sm text-gray-400 italic">
+                    Belum ada supplier yang dipilih.
+                </div>
+
+                @error('supplier_ids')
+                    <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                @enderror
+                @error('supplier_ids.*')
+                    <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                @enderror
+            </div>
 
                 <!-- Product Name -->
                 <div class="mb-6">

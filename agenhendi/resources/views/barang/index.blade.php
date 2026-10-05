@@ -37,7 +37,6 @@
                 <thead class="bg-gray-100 border-b">
                     <tr>
                         <th class="px-6 py-4 text-left text-gray-700 font-semibold">Nama Barang</th>
-                        <th class="px-6 py-4 text-left text-gray-700 font-semibold">Supplier</th>
                         <th class="px-6 py-4 text-center text-gray-700 font-semibold">Satuan</th>
                         <th class="px-6 py-4 text-right text-gray-700 font-semibold">Harga Jual</th>
                         <th class="px-6 py-4 text-center text-gray-700 font-semibold">Aksi</th>
@@ -47,13 +46,6 @@
                     @forelse($data as $item)
                         <tr class="border-b hover:bg-gray-50 transition {{ $item->stok <= $item->stok_minimum ? 'bg-red-50' : '' }}">
                             <td class="px-6 py-4 font-semibold text-gray-800">{{ $item->nama_barang }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">
-                                @if($item->suppliers->count() > 0)
-                                    {{ $item->suppliers->pluck('nama_supplier')->join(', ') }}
-                                @else
-                                    <span class="text-gray-400 italic">Tidak ada</span>
-                                @endif
-                            </td>
                             {{-- <td class="px-6 py-4 text-center">
                                 <span class="inline-block px-3 py-1 rounded-full text-sm font-bold {{ $item->stok <= $item->stok_minimum ? 'bg-red-200 text-red-800' : 'bg-green-200 text-green-800' }}">
                                     {{ $item->stok }}
